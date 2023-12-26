@@ -1,8 +1,6 @@
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
-
-
 
 public class GameMain extends JPanel implements MouseListener{
 	//Constants for game 
@@ -37,10 +35,17 @@ public class GameMain extends JPanel implements MouseListener{
 	
 
 	/** Constructor to setup the UI and game components on the panel */
+	public enum GameState {
+	    Playing, Draw, Cross_won, Nought_won
+	}
+
 	public GameMain() {   
 		
-		// TODO: This JPanel fires a MouseEvent on MouseClicked so add required event listener to 'this'.          
-	    
+		// TODO: This JPanel fires a MouseEvent on MouseClicked so add required event listener to 'this'. 
+		
+		addMouseListener(this);
+		board = new Board(); // Создание экземпляра доски
+		initGame(); // Инициализация игры
 	    
 		// Setup the status bar (JLabel) to display status message       
 		statusBar = new JLabel("         ");       
@@ -70,16 +75,21 @@ public class GameMain extends JPanel implements MouseListener{
 				//create a main window to contain the panel
 				JFrame frame = new JFrame(TITLE);
 				
-				//TODO: create the new GameMain panel and add it to the frame
-						
+				//create the new GameMain panel and add it to the frame
+				GameMain gameMain = new GameMain(); // Создаем объект GameMain	
 				
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Установка операции закрытия
+	            //frame.add(new GameMain()); // Добавление панели в фрейм
+	            frame.add(gameMain); // Добавление панели в фрейм
+	            frame.pack();
 				
 				//TODO: set the default close operation of the frame to exit_on_close
-		            
+	            
+		        frame.setLocationRelativeTo(null);
+	            frame.setVisible(true);    
 				
-				frame.pack();             
-				frame.setLocationRelativeTo(null);
-				frame.setVisible(true);
+	         // Вызываем метод initGame() после создания объекта GameMain
+	            gameMain.initGame();
 	         }
 		 });
 	}
@@ -97,12 +107,12 @@ public class GameMain extends JPanel implements MouseListener{
 			if (currentPlayer == Player.Cross) {   
 			
 				//TODO: use the status bar to display the message "X"'s Turn
-
+				statusBar.setText("'X' Turn");
 				
 			} else {    
 				
 				//TODO: use the status bar to display the message "O"'s Turn
-
+				statusBar.setText("'O' Turn");
 				
 			}       
 			} else if (currentState == GameState.Draw) {          
@@ -120,14 +130,21 @@ public class GameMain extends JPanel implements MouseListener{
 	
 	  /** Initialise the game-board contents and the current status of GameState and Player) */
 		public void initGame() {
+			//board = new Board();
+		    currentState = GameState.Playing;
+		    currentPlayer = Player.Cross;
+		    statusBar.setText("'X' Turn");
+		    repaint();
+		    
 			for (int row = 0; row < ROWS; ++row) {          
 				for (int col = 0; col < COLS; ++col) {  
 					// all cells empty
 					board.cells[row][col].content = Player.Empty;           
 				}
 			}
-			 currentState = GameState.Playing;
-			 currentPlayer = Player.Cross;
+			board.initGame(); // Вызов метода инициализации доски
+			currentState = GameState.Playing; // Начальное состояние игры
+			currentPlayer = Player.Cross; // Крестики начинают игру
 		}
 		
 		
@@ -136,57 +153,49 @@ public class GameMain extends JPanel implements MouseListener{
 		 * If no winner then isDraw is called to see if deadlock, if not GameState stays as PLAYING
 		 *   
 		 */
-		public void updateGame(Player thePlayer, int row, int col) {
-			//check for win after play
-			if(board.hasWon(thePlayer, row, col)) {
-				
-				// TODO: check which player has won and update the currentstate to the appropriate gamestate for the winner
-
-				
-			} else 
-				if (board.isDraw ()) {
-					
-				// TODO: set the currentstate to the draw gamestate
-
-			}
-			//otherwise no change to current state of playing
+		public void updateGame(Player thePlayer, int rowSelected, int colSelected) {
+		    // Проверка на выигрыш после хода
+		    if (board.hasWon(thePlayer, rowSelected, colSelected)) {
+		        currentState = (thePlayer == Player.Cross) ? GameState.Cross_won : GameState.Nought_won;
+		    } else if (board.isDraw()) {
+		        currentState = GameState.Draw;
+		    }
+		    // В противном случае нет изменений в текущем состоянии игры (остаемся в режиме игры)
 		}
-		
 				
 	
 		/** Event handler for the mouse click on the JPanel. If selected cell is valid and Empty then current player is added to cell content.
 		 *  UpdateGame is called which will call the methods to check for winner or Draw. if none then GameState remains playing.
 		 *  If win or Draw then call is made to method that resets the game board.  Finally a call is made to refresh the canvas so that new symbol appears*/
 	
-	public void mouseClicked(MouseEvent e) {  
-	    // get the coordinates of where the click event happened            
-		int mouseX = e.getX();             
-		int mouseY = e.getY();             
-		// Get the row and column clicked             
-		int rowSelected = mouseY / CELL_SIZE;             
-		int colSelected = mouseX / CELL_SIZE;               			
-		if (currentState == GameState.Playing) {                
-			if (rowSelected >= 0 && rowSelected < ROWS && colSelected >= 0 && colSelected < COLS && board.cells[rowSelected][colSelected].content == Player.Empty) {
-				// move  
-				board.cells[rowSelected][colSelected].content = currentPlayer; 
-				// update currentState                  
-				updateGame(currentPlayer, rowSelected, colSelected); 
-				// Switch player
-				if (currentPlayer == Player.Cross) {
-					currentPlayer =  Player.Nought;
-				}
-				else {
-					currentPlayer = Player.Cross;
-				}
-			}             
-		} else {        
-			// game over and restart              
-			initGame();            
-		}   
-		
-		//TODO: redraw the graphics on the UI          
-           
-	}
+		public void mouseClicked(MouseEvent e) {  
+		    // Получаем координаты места клика
+		    int mouseX = e.getX();             
+		    int mouseY = e.getY();             
+		    // Вычисляем строку и столбец, по которым произошел клик
+		    int rowSelected = mouseY / CELL_SIZE;             
+		    int colSelected = mouseX / CELL_SIZE;               			
+		    
+		    if (currentState == GameState.Playing) {                
+		        // Проверяем, что выбранная ячейка находится в пределах игрового поля
+		        if (rowSelected >= 0 && rowSelected < ROWS && colSelected >= 0 && colSelected < COLS && board.cells[rowSelected][colSelected].content == Player.Empty) {
+		            // Устанавливаем символ текущего игрока в выбранную ячейку
+		            board.cells[rowSelected][colSelected].content = currentPlayer; 
+		            // Обновляем состояние игры
+		            updateGame(currentPlayer, rowSelected, colSelected);
+		            
+		            // Обновляем текст в статусной строке
+		            statusBar.setText((currentPlayer == Player.Cross) ? "'X' Turn" : "'O' Turn");
+		            
+		            repaint();
+		        }
+		    } else {        
+		        // Если игра окончена, перезапускаем игру
+		        initGame();            
+		    }   
+		    // Перерисовываем графику на UI           
+		}
+
 		
 	
 	@Override
