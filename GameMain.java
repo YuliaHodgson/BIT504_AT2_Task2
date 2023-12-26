@@ -65,7 +65,7 @@ public class GameMain extends JPanel implements MouseListener{
 
 	}
 	
-	public static void main(String[] args) {
+public static void main(String[] args) {
 		    // Run GUI code in Event Dispatch thread for thread safety.
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 	         public void run() {
