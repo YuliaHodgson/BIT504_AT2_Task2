@@ -93,6 +93,23 @@ public class Board {
 			}
 		}
 	}
+	public void initGame() {
+		//board = new Board();
+	    currentState = GameState.Playing;
+	    currentPlayer = Player.Cross;
+	    statusBar.setText("'X' Turn");
+	    repaint();
+	    
+		for (int row = 0; row < ROWS; ++row) {          
+			for (int col = 0; col < COLS; ++col) {  
+				// all cells empty
+				board.cells[row][col].content = Player.Empty;           
+			}
+		}
+		board.initGame(); // Calling the board initialization method
+		currentState = GameState.Playing; // Initial state of the game
+		currentPlayer = Player.Cross; // Crosses start the game
+	}
 	
 
 }
