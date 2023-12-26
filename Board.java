@@ -9,6 +9,11 @@ public class Board {
 	//2D array of ROWS-by-COLS Cell instances
 	Cell [][] cells;
 	
+	// Variables for game state
+    private GameState currentState;
+    private Player currentPlayer;
+    private JLabel statusBar; // Assuming you have a JLabel statusBar in your JFrame
+	
 	/** Constructor to create the game board */
 	public Board() {
 		
@@ -94,22 +99,23 @@ public class Board {
 		}
 	}
 	public void initGame() {
-		//board = new Board();
-	    currentState = GameState.Playing;
-	    currentPlayer = Player.Cross;
-	    statusBar.setText("'X' Turn");
-	    repaint();
-	    
-		for (int row = 0; row < ROWS; ++row) {          
-			for (int col = 0; col < COLS; ++col) {  
-				// all cells empty
-				board.cells[row][col].content = Player.Empty;           
-			}
-		}
-		board.initGame(); // Calling the board initialization method
-		currentState = GameState.Playing; // Initial state of the game
-		currentPlayer = Player.Cross; // Crosses start the game
-	}
-	
+        // Reset the game state
+        currentState = GameState.Playing;
+        currentPlayer = Player.Cross;
+        statusBar.setText("'X' Turn"); // Assuming statusBar is initialized somewhere
 
+        // Reset the cells
+        for (int row = 0; row < ROWS; ++row) {          
+            for (int col = 0; col < COLS; ++col) {  
+                cells[row][col].content = Player.Empty;           
+            }
+        }
+
+        // No need to call board.initGame() here, since we are in the method already
+        // Just set the initial state of the game
+        currentState = GameState.Playing; // Initial state of the game
+        currentPlayer = Player.Cross; // Crosses start the game
+
+        repaint(); // Repaint the board for the new game state
+    }
 }
