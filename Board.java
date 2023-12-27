@@ -1,6 +1,8 @@
 import java.awt.*;
+import javax.swing.JLabel;
+import javax.swing.*;
 
-public class Board {
+public class Board extends JPanel{
 	// grid line width
 	public static final int GRID_WIDTH = 8;
 	// grid line half width
@@ -10,13 +12,12 @@ public class Board {
 	Cell [][] cells;
 	
 	// Variables for game state
-    private GameState currentState;
-    private Player currentPlayer;
-    private JLabel statusBar; // Assuming you have a JLabel statusBar in your JFrame
 	
+    private Player currentPlayer;
+   
 	/** Constructor to create the game board */
 	public Board() {
-		
+		this.setPreferredSize(new Dimension(GameMain.CANVAS_WIDTH, GameMain.CANVAS_HEIGHT));
 		cells = new Cell[GameMain.ROWS][GameMain.COLS]; //initialise the cells array using ROWS and COLS constants
 		
 		for (int row = 0; row < GameMain.ROWS; ++row) {
@@ -24,7 +25,17 @@ public class Board {
 				cells[row][col] = new Cell(row, col);
 			}
 		}
+		initGame();  
 	}
+	
+	public void initGame() {
+        currentPlayer = Player.Cross; // Crosses begin
+        for (int row = 0; row < GameMain.ROWS; ++row) {
+            for (int col = 0; col < GameMain.COLS; ++col) {
+                cells[row][col].clear(); // Use the clear method to set the initial state of the cells
+            }
+        }
+    }
 	 /** Return true if it is a draw (i.e., no more EMPTY cells) */ 
 	public boolean isDraw() {
 		 
@@ -77,6 +88,7 @@ public class Board {
 	 * Draws the grid (rows then columns) using constant sizes, then call on the
 	 * Cells to paint themselves into the grid
 	 */
+	
 	public void paint(Graphics g) {
 		//draw the grid
 		g.setColor(Color.gray);
@@ -98,24 +110,24 @@ public class Board {
 			}
 		}
 	}
-	public void initGame() {
-        // Reset the game state
-        currentState = GameState.Playing;
-        currentPlayer = Player.Cross;
-        statusBar.setText("'X' Turn"); // Assuming statusBar is initialized somewhere
-
-        // Reset the cells
-        for (int row = 0; row < ROWS; ++row) {          
-            for (int col = 0; col < COLS; ++col) {  
-                cells[row][col].content = Player.Empty;           
+	
+	@Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        
+        for (int row = 0; row < GameMain.ROWS; ++row) {
+            for (int col = 0; col < GameMain.COLS; ++col) {
+                cells[row][col].paint(g); // Call paint on each cell
             }
         }
+    }
 
-        // No need to call board.initGame() here, since we are in the method already
-        // Just set the initial state of the game
-        currentState = GameState.Playing; // Initial state of the game
-        currentPlayer = Player.Cross; // Crosses start the game
+    // Getters and setters for cells and players
+    public Player getContent(int row, int col) {
+        return cells[row][col].content;
+    }
 
-        repaint(); // Repaint the board for the new game state
+    public void setContent(int row, int col, Player player) {
+        cells[row][col].content = player;
     }
 }

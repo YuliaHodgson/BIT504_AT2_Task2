@@ -15,7 +15,7 @@ public class GameMain extends JPanel implements MouseListener{
 	//drawing canvas
 	public static final int CANVAS_WIDTH = CELL_SIZE * COLS;
 	public static final int CANVAS_HEIGHT = CELL_SIZE * ROWS;
-	//Noughts and Crosses are displayed inside a cell, with padding from border
+	//Noughts and Crosses are displayed inside a cell, with padding from the border.
 	public static final int CELL_PADDING = CELL_SIZE / 6;    
 	public static final int SYMBOL_SIZE = CELL_SIZE - CELL_PADDING * 2;    
 	public static final int SYMBOL_STROKE_WIDTH = 8;
@@ -24,7 +24,7 @@ public class GameMain extends JPanel implements MouseListener{
 	// the game board 
 	private Board board;
 	 	 
-	// Create the enumeration for the variable below (GameState currentState)
+	// create the enumeration for the variable below (GameState currentState)
 	//HINT all of the states you require are shown in the code within GameMain
 	private GameState currentState; 
 	
@@ -39,31 +39,22 @@ public class GameMain extends JPanel implements MouseListener{
 	    Playing, Draw, Cross_won, Nought_won
 	}
 
-	public GameMain() {   
-		
-		// This JPanel fires a MouseEvent on MouseClicked so add required event listener to 'this'. 
-		
-		addMouseListener(this);
-		board = new Board(); 
-		initGame(); 
-	    
-		// Setup the status bar (JLabel) to display status message       
-		statusBar = new JLabel("         ");       
-		statusBar.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 14));       
-		statusBar.setBorder(BorderFactory.createEmptyBorder(2, 5, 4, 5));       
-		statusBar.setOpaque(true);       
-		statusBar.setBackground(Color.LIGHT_GRAY);  
-		
-		//layout of the panel is in border layout
-		setLayout(new BorderLayout());       
-		add(statusBar, BorderLayout.SOUTH);
-		// account for statusBar height in overall height
-		setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT + 30));
-		
-		// Create a new instance of the game "Board"class. HINT check the variables above for the correct name
-		// call the method to initialise the game board
+	public GameMain() {
+        statusBar = new JLabel(" ");
+        statusBar.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 14));
+        statusBar.setBorder(BorderFactory.createEmptyBorder(2, 5, 4, 5));
+        statusBar.setOpaque(true);
+        statusBar.setBackground(Color.LIGHT_GRAY);
+        setLayout(new BorderLayout());
+        add(statusBar, BorderLayout.SOUTH);
 
-	}
+        board = new Board();
+        add(board);
+        setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT + 30));
+
+        addMouseListener(this);
+        initGame();
+    }
 	
 public static void main(String[] args) {
 		    // Run GUI code in Event Dispatch thread for thread safety.
@@ -75,17 +66,14 @@ public static void main(String[] args) {
 				//create the new GameMain panel and add it to the frame
 				GameMain gameMain = new GameMain(); 
 				
-				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Установка операции закрытия
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	            //frame.add(new GameMain()); 
 	            frame.add(gameMain); 
 	            frame.pack();
-				
-				// set the default close operation of the frame to exit_on_close
 	            
 		        frame.setLocationRelativeTo(null);
 	            frame.setVisible(true);    
-
-	            gameMain.initGame();
+				gameMain.initGame();
 	         }
 		 });
 	}
@@ -102,12 +90,11 @@ public static void main(String[] args) {
 			statusBar.setForeground(Color.BLACK);          
 			if (currentPlayer == Player.Cross) {   
 			
-				//use the status bar to display the message "X"'s Turn
+				//TODO: use the status bar to display the message "X"'s Turn
 				statusBar.setText("'X' Turn");
 				
 			} else {    
 				
-				//use the status bar to display the message "O"'s Turn
 				statusBar.setText("'O' Turn");
 				
 			}       
@@ -125,23 +112,12 @@ public static void main(String[] args) {
 		
 	
 	  /** Initialise the game-board contents and the current status of GameState and Player) */
-		public void initGame() {
-			//board = new Board();
-		    currentState = GameState.Playing;
-		    currentPlayer = Player.Cross;
-		    statusBar.setText("'X' Turn");
-		    repaint();
-		    
-			for (int row = 0; row < ROWS; ++row) {          
-				for (int col = 0; col < COLS; ++col) {  
-					// all cells empty
-					board.cells[row][col].content = Player.Empty;           
-				}
-			}
-			board.initGame(); // Calling the board initialization method
-			currentState = GameState.Playing; // Initial state of the game
-			currentPlayer = Player.Cross; // Crosses start the game
-		}
+	public void initGame() {
+		currentState = GameState.Playing;
+        currentPlayer = Player.Cross;
+        statusBar.setText("X's Turn");
+        board.initGame();  // Reinitializing the playing field
+    }
 		
 		
 		/**After each turn check to see if the current player hasWon by putting their symbol in that position, 
@@ -151,12 +127,13 @@ public static void main(String[] args) {
 		 */
 		public void updateGame(Player thePlayer, int rowSelected, int colSelected) {
 		    // Checking for a win after a move
-		    if (board.hasWon(thePlayer, rowSelected, colSelected)) {
+			if (board.hasWon(thePlayer, rowSelected, colSelected)) {  // Check for win
 		        currentState = (thePlayer == Player.Cross) ? GameState.Cross_won : GameState.Nought_won;
-		    } else if (board.isDraw()) {
+		        statusBar.setText(thePlayer == Player.Cross ? "X Won! Click to play again." : "O Won! Click to play again.");
+		    } else if (board.isDraw()) {  // Checking for a draw
 		        currentState = GameState.Draw;
+		        statusBar.setText("It's a Draw! Click to play again.");
 		    }
-		    // Otherwise there is no change to the current game state (we remain in game mode)
 		}
 				
 	
@@ -172,28 +149,21 @@ public static void main(String[] args) {
 		    int rowSelected = mouseY / CELL_SIZE;             
 		    int colSelected = mouseX / CELL_SIZE;               			
 		    
-		    if (currentState == GameState.Playing) {                
-		        // Check that the selected cell is within the playing field
-		        if (rowSelected >= 0 && rowSelected < ROWS && colSelected >= 0 && colSelected < COLS && board.cells[rowSelected][colSelected].content == Player.Empty) {
-		            // Set the symbol of the current player to the selected cell
-		            board.cells[rowSelected][colSelected].content = currentPlayer; 
-		            // Update the game state
-		            updateGame(currentPlayer, rowSelected, colSelected);
-		            
-		            // Update the text in the status bar
-		            statusBar.setText((currentPlayer == Player.Cross) ? "'X' Turn" : "'O' Turn");
-		            
-		            repaint();
+		    if (currentState == GameState.Playing) {
+		        if (rowSelected >= 0 && rowSelected < ROWS && colSelected >= 0 && colSelected < COLS && board.getContent(rowSelected, colSelected) == Player.Empty) {
+		            board.setContent(rowSelected, colSelected, currentPlayer); // Make a move
+		            updateGame(currentPlayer, rowSelected, colSelected);  // Check for win or draw
+
+		            // Переключить игрока
+		            currentPlayer = (currentPlayer == Player.Cross) ? Player.Nought : Player.Cross;
+		            statusBar.setText((currentPlayer == Player.Cross) ? "X's Turn" : "O's Turn");
 		        }
-		    } else {        
-		        // If the game is over, restart the game
-		        initGame();            
-		    }   
-		    // Redrawing graphics on the UI           
+		    } else {  // If the game is over, click to restart the game
+		        initGame();
+		    }
+		    repaint();          
 		}
 
-		
-	
 	@Override
 	public void mousePressed(MouseEvent e) {
 		//  Auto-generated, event not used

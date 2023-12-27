@@ -1,7 +1,4 @@
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 
 public class Cell {
     //content of this cell (empty, cross, nought)
@@ -45,8 +42,7 @@ public class Cell {
 	public void clear() {
 		
 		//Set the value of content to Empty (Remember this is an enum)
-		content = Player.Empty;
-		
+		content = Player.Empty;		
 	}
 		
 }
